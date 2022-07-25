@@ -1,14 +1,14 @@
-ARG ALPINE_VERSION=3.13
+ARG ALPINE_VERSION=3.16
 
 ##### Building stage #####
 FROM alpine:${ALPINE_VERSION} as builder
-LABEL version = "1.5"
+LABEL version = "1.6"
 LABEL maintainer = "JamiePhonic@gmail.com"
 
 # Versions of nginx, rtmp-module and ffmpeg 
-ARG  NGINX_VERSION=1.21.3
+ARG  NGINX_VERSION=1.23.0
 ARG  NGINX_RTMP_MODULE_VERSION=1.2.2
-ARG  FFMPEG_VERSION=4.4
+ARG  FFMPEG_VERSION=5.1
 
 # Install dependencies
 RUN apk update	&& \
@@ -72,7 +72,6 @@ RUN cd /tmp/build/ffmpeg-${FFMPEG_VERSION} && \
 	  --enable-libvorbis \
 	  --enable-librtmp \
 	  --enable-postproc \
-	  --enable-avresample \
 	  --enable-swresample \ 
 	  --enable-libfreetype \
 	  --enable-libmp3lame \

@@ -2,13 +2,13 @@ ARG DEBIAN_VERSION=stretch-slim
 
 ##### Building stage #####
 FROM debian:${DEBIAN_VERSION} as builder
-LABEL version = "1.5"
+LABEL version = "1.6"
 LABEL maintainer = "JamiePhonic@gmail.com"
 
 # Versions of nginx, rtmp-module and ffmpeg 
-ARG  NGINX_VERSION=1.21.3
+ARG  NGINX_VERSION=1.23.0
 ARG  NGINX_RTMP_MODULE_VERSION=1.2.2
-ARG  FFMPEG_VERSION=4.4
+ARG  FFMPEG_VERSION=5.1
 
 # Install dependencies
 RUN apt-get update && \
