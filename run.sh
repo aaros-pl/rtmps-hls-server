@@ -14,35 +14,24 @@ function generate_certificate () {
 # If /assets has been mounted from the host, this will automatically populate the host directory with the files
 # Copy default players and configs if '/assets/.initialized' does not exist
 
-if [ ! -f "/assets/.initialized" ]; then
-	echo -e "`date +"%Y-%m-%d %H:%M:%S"` INFO: Copying default Assets to /assets/"
-    # Copy default assets from /assets-default/ to /assets/
-    # Hard link the hls player as index.html (making it the default player)
-    if [ "$IMAGE" = "Alpine" ]; then
-        cp -Rfv /assets-default/* /assets/ 2>/dev/null
-        ln -f /assets/players/hls.html /assets/players/index.html
-    else
-        cp -Rfv /assets-default/* /assets/ 2>/dev/null
-        ln -f /assets/players/hls.html /assets/players/index.html
-    fi
-    # Create an empty file called '.initialized' so we dont re-copy the assets again
-	echo "Delete me and restart the container to restore default configs and players." >/assets/.initialized
-fi
+echo -e "`date +"%Y-%m-%d %H:%M:%S"` INFO: Copying default Assets to /assets/"
+# Copy default assets from /assets-default/ to /assets/
+# Hard link the hls player as index.html (making it the default player)
+cp -Rfv /assets-default/* /assets/ 2>/dev/null
+ln -f /assets/players/hls.html /assets/players/index.html
+# Create an empty file called '.initialized' so we dont re-copy the assets again
+echo "Delete me and restart the container to restore default configs and players." >/assets/.initialized
 
 echo -e "`date +"%Y-%m-%d %H:%M:%S"` INFO: Creating symlinks to Configs and Players from /assets/ \\n"
 # Link players from assets directory
 ln -sf /assets/players /usr/local/nginx/html/
 # Link Nginx config from assets directory
 ln -sf /assets/configs/nginx.conf /etc/nginx/nginx.conf
-# Link Stunnel config from assets directory
-ln -sf /assets/configs/stunnel.conf /etc/stunnel/stunnel.conf
 
 # Verify the SSL directory exists. if not, create it
-if [ ! -d /assets/ssl/.self_signed ]; then
-    mkdir -p /assets/ssl/.self_signed
-fi
+mkdir -p /assets/ssl/.self_signed
 
-# Create a cert/key pair a Certificate Authroity cert if it doesn't already exist, 
+# Create a cert/key pair a Certificate Authroity cert if it doesn't already exist,
 # otherwise we won't be able to generate a self signed cert and Nginx won't start properly.
 if [ ! -f "/assets/ssl/.self_signed/RTMP-CA.crt" ]; then
     echo -e "`date +"%Y-%m-%d %H:%M:%S"` INFO: Generating a Self Signing Certificate Authority..."
@@ -68,14 +57,6 @@ else # If a certificate DOES already exist, check if it's valid for the domain s
     fi
 fi
 
-# Recursivley CHOWN the /assets directory to $PUID:$PGID
-echo -e "`date +"%Y-%m-%d %H:%M:%S"` INFO: Setting Owner:Group on /assets/ to: $PUID:$PGID \\n"
-chown -R $PUID:$PGID /assets
-
-# Start Stunnel to handle outbound RTMPS streams (Facebook Live)
-echo -e "`date +"%Y-%m-%d %H:%M:%S"` INFO: Starting Stunnel..."
-stunnel4
-sleep 2
 # Start Nginx
 echo -e "`date +"%Y-%m-%d %H:%M:%S"` INFO: Starting Nginx!"
 exec nginx -g "daemon off;"
