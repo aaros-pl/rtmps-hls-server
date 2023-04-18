@@ -1,3 +1,7 @@
+## Usage
+
+``SSL_DOMAIN="mydomain.com" docker-compose up``
+
 ## Generate keys
 
 For sanity testing certificate generation
@@ -36,6 +40,8 @@ Using [OBS](https://obsproject.com/):
 ```
 ffmpeg -r 30 -f lavfi -i testsrc -vf scale=1280:960 -vcodec libx264 -profile:v baseline -pix_fmt yuv420p -f flv rtmp://mydomain.com:1935/live/test
 ```
+
+docker run --rm jrottenberg/ffmpeg -r 30 -f lavfi -i testsrc -vf scale=1280:960 -vcodec libx264 -profile:v baseline -pix_fmt yuv420p -f flv rtmp:/192.168.50.66:1935/live/test
 
 2. View at: http://mydomain.com:8080/players/
 

@@ -4,4 +4,5 @@
 # Explicitly unignore what we need for building
 !nginx.conf
 !hls.html
-!run.sh
+!entrypoint.sh
+!cert_request.ini
