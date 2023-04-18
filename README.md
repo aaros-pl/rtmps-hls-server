@@ -1,92 +1,63 @@
-# RTMPS-HLS-Server Docker
-
-**Docker image for video streaming server that supports RTMP, RTMPS and HLS streams.**
-
-## Description
-
-This Docker image can be used to create a video streaming server that supports [**RTMP**](https://en.wikipedia.org/wiki/Real-Time_Messaging_Protocol) & **RTMPS**\* Ingest, **RTMP** Pushing, and **RTMP**, [**HLS**](https://en.wikipedia.org/wiki/HTTP_Live_Streaming) playback out of the box.
-All modules are built from source on Alpine Linux base images.
-
-## Features
-
-- The backend is [**Nginx**](http://nginx.org/en/) with [**nginx-rtmp-module**](https://github.com/arut/nginx-rtmp-module).
-- [**FFmpeg**](https://www.ffmpeg.org/) for transcoding and adaptive streaming
-- Default settings:
-  - RTMP is ON
-  - HLS is ON
-  - Other Nginx configuration files are also provided to allow for RTMP-only streams or FFmpeg transcoding and adaptive streaming.
-- Statistic page of RTMP streams at `http://<server ip>:<server port>/stats`.
-- Available web video players (based on [video.js](https://videojs.com/) and [hls.js](https://github.com/video-dev/hls.js/)) at `/usr/local/nginx/html/players`.
-
-Current Image is built using:
-
-- Nginx 1.23.0 (compiled from source)
-- Nginx-rtmp-module 1.2.2 (compiled from source)
-- FFmpeg 5.1 (compiled from source)
-
-This image was inspired by similar docker images from [tiangolo](https://hub.docker.com/r/tiangolo/nginx-rtmp/) and [alfg](https://hub.docker.com/r/alfg/nginx-rtmp/). It has small build size, adds support for HTTP-based streams and adaptive streaming using FFmpeg.
-
 ## Usage
 
-### To run the server
+Start server with:
 
-```shell
-docker run -d -p 1935:1935 -p 1936:1936 -p 8080:8080 -e PUID=$UID -e PGID=0 -e SSL_DOMAIN='rtmp.domain.loc' -v /your/local/assets/:/assets jamiephonic/rtmps-hls-server:latest
+`SSL_DOMAIN="192.168.50.66" docker-compose up`
+
+## Generate Certificate
+
+Certificate and key are generated when docker image starts and placed in `.ssl`
+
+Install `rtmp.crt` as trusted root certificate (step varies per OS)
+
+```
+$ sudo cp ./example.com.crt /usr/local/share/ca-certificates
+$ sudo update-ca-certificates
 ```
 
-When you start the container, the default players and configuration files will be copied into `/your/local/assets/` to allow you to easily access and edit them.
-This will only be done once when you first start the container. If you want to restore the default configs, delete `/your/local/assets/.initialized` and restart the container.
+## Test Stream
 
-For more examples, see the [Wiki](https://github.com/JamiePhonic/rtmps-hls-server/wiki/usage)
+For sanity testing streaming from a controlled device.
 
-***
+### RTMP
 
-### To stream to the server
+1. Test via:
 
-- **Stream live RTMP content to:**
+```
+docker run --rm jrottenberg/ffmpeg -r 30 -f lavfi -i testsrc -vf scale=1280:960 -vcodec libx264 -profile:v baseline -pix_fmt yuv420p -f flv rtmp:/192.168.50.66:1935/live/test
+```
 
- `rtmp://<server ip>:1935/live/<stream_key>`
+2. View at: http://192.168.50.66:8080
 
-  where `<stream_key>` is any stream key you specify.
+### RTMPS
 
-- **Configure [OBS](https://obsproject.com/) to stream content:** <br />
-  Go to Settings > Stream, choose the following settings:
-  - Service: Custom Streaming Server.
-  - Server: `rtmp://<server ip>:1935/live`.
-  - Stream key: anything you want, however provided video players assume stream key is `test`
+1. Test via:
 
-See the [Wiki](https://github.com/JamiePhonic/rtmps-hls-server/wiki/streaming-to-the-server) for how to stream to the server with RTMPS
+```
+docker run --rm jrottenberg/ffmpeg -r 30 -f lavfi -i testsrc -vf scale=1280:960 -vcodec libx264 -profile:v baseline -pix_fmt yuv420p -f flv rtmps://192.168.50.66:1936/live/test
+```
 
-***
+2. View at: http://192.168.50.66:8080
 
-### To view the stream
+## Actual Test
 
-- **Using [VLC](https://www.videolan.org/vlc/index.html):**
+### RTMP
 
-  - Go to Media > Open Network Stream.
-  - Enter the streaming URL: `rtmp://<server ip>:1935/live/<stream-key>`
-    Replace `<server ip>` with the IP of where the server is running, and
-    `<stream-key>` with the stream key you used when setting up the stream.
-  - For HLS, the URLs are of the forms:
-    `http://<server ip>:8080/hls/<stream-key>.m3u8`
-  - Click Play.
+stream to: `rtmp://192.168.50.66:1935/live/test`
 
-- **Using provided web players:** <br/>
-  The provided demo players assume the stream-key is called `test` and the player is opened from localhost.
-  - To play RTMP content (requires Flash): `http://<server ip>:8080/players/rtmp.html`
-  - To play HLS content using hls.js library: `http://<server ip>:8080/players/hls.html`
+```
+poetry run gopro-livestream dabugdabug pleasedontguessme "rtmp://192.168.50.66:1935/live/test"
+```
 
-  **Notes:**
+### RTMPS
 
-  - These web players are hardcoded to play stream key "test" at localhost.
-  - To change the stream source for these players, Modify the `src` attribute in the video tag in the html file and then reload the page.
+Stream to `rtmps://192.168.50.66:8443/live/test`
 
-## Copyright
+```
+poetry run gopro-livestream --cert ./certs/example.com.crt dabugdabug pleasedontguessme "rtmps://192.168.50.66:1936/live/test"
+```
 
-Released under MIT license.
+## Debugging
 
-## More info
-
-- **GitHub repo**: <https://github.com/JamiePhonic/rtmp-hls-server.git>
-
-- **Docker Hub image**: <https://hub.docker.com/r/jamiephonic/rtmps-hls-server>
+Stats can be viewed at `http://localhost:8080/stats`. This is a good way to just make
+sure the server / stream are running.
