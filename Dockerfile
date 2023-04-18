@@ -87,15 +87,13 @@ RUN cp /tmp/build/nginx-rtmp-module-${NGINX_RTMP_MODULE_VERSION}/stat.xsl /usr/l
 ##### Building the final image #####
 FROM alpine:${ALPINE_VERSION}
 
-# Install dependencies and create the assets folder for default players and configs to be copied to
+# Install dependencies
 RUN apk update && \
     apk --no-cache add \
         bash ca-certificates openssl \
         pcre libtheora libvorbis lame libvpx \
         librtmp x264-dev x265-dev freetype htop && \
-    rm -rf /var/lib/apt/lists/* && \
-    mkdir /assets-default && mkdir /assets-default/ssl && \
-    mkdir /assets
+    rm -rf /var/lib/apt/lists/*
 
 # Copy files from build stage to final stage
 COPY --from=builder /usr/local /usr/local
@@ -108,10 +106,11 @@ COPY --from=builder /var/run/nginx /var/run/nginx
 RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
     ln -sf /dev/stderr /var/log/nginx/error.log
 
-# Copy  html players to container
-COPY players /assets-default/players
+COPY ./hls.html /usr/local/nginx/html/player.html
+COPY ./nginx.conf /etc/nginx/nginx.conf
 
 # Copy run script to container
 COPY run.sh /run.sh
 
 CMD ["bash", "/run.sh"]
+# CMD ["bash"]

@@ -1,0 +1,7 @@
+# Start by ignoring everything
+**
+
+# Explicitly unignore what we need for building
+!nginx.conf
+!hls.html
+!run.sh

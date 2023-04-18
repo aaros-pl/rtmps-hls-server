@@ -2,12 +2,11 @@ services:
     nginx-rtmps:
         build: .
         volumes:
-            - ./assets:/assets
-            - ./conf:/assets-default/configs
+            - ./.ssl:/ssl
         ports:
             - 1935:1935
             - 1936:1936
             - 8080:8080
-            - 443:443
+            - 443:443 # TODO
         environment:
             - SSL_DOMAIN=mydomain.com
