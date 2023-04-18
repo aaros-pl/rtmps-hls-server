@@ -2,16 +2,18 @@
 
 Start server with:
 
-`SSL_DOMAIN="192.168.50.66" docker-compose up`
+`SSL_DOMAIN="{IP_ADDRESS}" docker-compose up`
+
+where IP_ADDRESS is the IP Address of the device the server is running on.
 
 ## Generate Certificate
 
 Certificate and key are generated when docker image starts and placed in `.ssl`
 
-Install `rtmp.crt` as trusted root certificate (step varies per OS)
+Install `rtmp.crt` as trusted root certificate (step varies per OS). On Ubunut for example:
 
 ```
-$ sudo cp ./example.com.crt /usr/local/share/ca-certificates
+$ sudo cp ./.ssl/self-signed/rtmp.crt /usr/local/share/ca-certificates
 $ sudo update-ca-certificates
 ```
 
@@ -24,37 +26,39 @@ For sanity testing streaming from a controlled device.
 1. Test via:
 
 ```
-docker run --rm jrottenberg/ffmpeg -r 30 -f lavfi -i testsrc -vf scale=1280:960 -vcodec libx264 -profile:v baseline -pix_fmt yuv420p -f flv rtmp:/192.168.50.66:1935/live/test
+docker run --rm jrottenberg/ffmpeg -r 30 -f lavfi -i testsrc -vf scale=1280:960 -vcodec libx264 -profile:v baseline -pix_fmt yuv420p -f flv rtmp:/{IP_ADDRESS}:1935/live/test
 ```
 
-2. View at: http://192.168.50.66:8080
+2. View at: http://localhost:8080 
 
 ### RTMPS
 
 1. Test via:
 
 ```
-docker run --rm jrottenberg/ffmpeg -r 30 -f lavfi -i testsrc -vf scale=1280:960 -vcodec libx264 -profile:v baseline -pix_fmt yuv420p -f flv rtmps://192.168.50.66:1936/live/test
+docker run --rm jrottenberg/ffmpeg -r 30 -f lavfi -i testsrc -vf scale=1280:960 -vcodec libx264 -profile:v baseline -pix_fmt yuv420p -f flv rtmps://{IP_ADDRESS}:1936/live/test
 ```
 
-2. View at: http://192.168.50.66:8080
+2. View at: http://localhost:8080
 
-## Actual Test
+## Actual Test with GoPro
+
+This uses the OGP Python SDK.
 
 ### RTMP
 
-stream to: `rtmp://192.168.50.66:1935/live/test`
+stream to: `rtmp://{IP_ADDRESS}:1935/live/test`
 
 ```
-poetry run gopro-livestream dabugdabug pleasedontguessme "rtmp://192.168.50.66:1935/live/test"
+poetry run gopro-livestream dabugdabug pleasedontguessme "rtmp://{IP_ADDRESS}:1935/live/test"
 ```
 
 ### RTMPS
 
-Stream to `rtmps://192.168.50.66:8443/live/test`
+Stream to `rtmps://{IP_ADDRESS}:1936/live/test`
 
 ```
-poetry run gopro-livestream --cert ./certs/example.com.crt dabugdabug pleasedontguessme "rtmps://192.168.50.66:1936/live/test"
+poetry run gopro-livestream --cert {CERT_FILE} {SSID} {PASSWORD} "rtmps://{IP_ADDRESS}:1936/live/test"
 ```
 
 ## Debugging
