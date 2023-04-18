@@ -10,7 +10,7 @@ where IP_ADDRESS is the IP Address of the device the server is running on.
 
 Certificate and key are generated when docker image starts and placed in `.ssl`
 
-Install `rtmp.crt` as trusted root certificate (step varies per OS). On Ubunut for example:
+Install `rtmp.crt` as trusted root certificate (step varies per OS). On Ubuntu for example:
 
 ```
 $ sudo cp ./.ssl/self-signed/rtmp.crt /usr/local/share/ca-certificates
@@ -50,7 +50,7 @@ This uses the OGP Python SDK.
 stream to: `rtmp://{IP_ADDRESS}:1935/live/test`
 
 ```
-poetry run gopro-livestream dabugdabug pleasedontguessme "rtmp://{IP_ADDRESS}:1935/live/test"
+poetry run gopro-livestream {SSID} {PASSWORD} "rtmp://{IP_ADDRESS}:1935/live/test"
 ```
 
 ### RTMPS
