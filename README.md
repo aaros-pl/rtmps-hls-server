@@ -29,7 +29,7 @@ For sanity testing streaming from a controlled device.
 docker run --rm jrottenberg/ffmpeg -r 30 -f lavfi -i testsrc -vf scale=1280:960 -vcodec libx264 -profile:v baseline -pix_fmt yuv420p -f flv rtmp:/{IP_ADDRESS}:1935/live/test
 ```
 
-2. View at: http://localhost:8080 
+2. View at: http://localhost:8080
 
 ### RTMPS
 
@@ -40,26 +40,6 @@ docker run --rm jrottenberg/ffmpeg -r 30 -f lavfi -i testsrc -vf scale=1280:960 
 ```
 
 2. View at: http://localhost:8080
-
-## Actual Test with GoPro
-
-This uses the OGP Python SDK.
-
-### RTMP
-
-stream to: `rtmp://{IP_ADDRESS}:1935/live/test`
-
-```
-poetry run gopro-livestream {SSID} {PASSWORD} "rtmp://{IP_ADDRESS}:1935/live/test"
-```
-
-### RTMPS
-
-Stream to `rtmps://{IP_ADDRESS}:1936/live/test`
-
-```
-poetry run gopro-livestream --cert {CERT_FILE} {SSID} {PASSWORD} "rtmps://{IP_ADDRESS}:1936/live/test"
-```
 
 ## Debugging
 

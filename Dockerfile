@@ -108,7 +108,7 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
 
 COPY ./hls.html /usr/local/nginx/html/player.html
 COPY ./nginx.conf /etc/nginx/nginx.conf
-COPY ./cert_request.ini /cert_request.ini
+COPY ./cert_request.ext /cert_request.ext
 
 # Copy run script to container
 COPY entrypoint.sh /entrypoint.sh

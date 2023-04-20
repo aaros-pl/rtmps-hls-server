@@ -22,11 +22,15 @@ function generate_cert_from_root
 function generate_standalone_cert
 {
     # Using IP Address, build temporary request file from template
-    cp /cert_request.ini /ssl/temp.ini
-    sed -i "s/__IP_ADDR__/$SSL_DOMAIN/g" /ssl/temp.ini
-    openssl req -new -nodes -x509 -days 365 -keyout /ssl/self_signed/rtmp.key -out /ssl/self_signed/rtmp.crt -config /ssl/temp.ini
+    cp /cert_request.ext /ssl/temp.ext
+    sed -i "s/__IP_ADDR__/$SSL_DOMAIN/g" /ssl/temp.ext
+    openssl genrsa -out /ssl/self_signed/rtmp.key 2048
+    openssl req -new -config /ssl/temp.ext -key /ssl/self_signed/rtmp.key -out /ssl/self_signed/rtmp.csr
+    openssl x509 -req -days 300 -in /ssl/self_signed/rtmp.csr -extfile /ssl/temp.ext -extensions req_ext -signkey /ssl/self_signed/rtmp.key -out /ssl/self_signed/rtmp.crt
+    rm /ssl/temp.ext
+    # Print it to the console
     openssl x509 -in /ssl/self_signed/rtmp.crt -noout -text
-    rm /ssl/temp.ini
+    cat /ssl/self_signed/rtmp.crt
 }
 
 if [[ $SSL_DOMAIN == "" ]]; then
