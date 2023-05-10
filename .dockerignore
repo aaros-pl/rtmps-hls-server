@@ -6,3 +6,4 @@
 !hls.html
 !entrypoint.sh
 !cert_request.ext
+!nginx_ffmpeg.conf
